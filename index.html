@@ -6,7 +6,7 @@
 <title>frosted link generator</title>
 <meta property="og:title" content="frosted link generator v.1">
 <meta property="og:description" content="generate frosted links by mrdavidss & crusader372">
-<meta property="og:image" content="https://frostedbrowser.github.io/frostedlinkgen/assets/frostedgen.png">
+<meta property="og:image" content="https://frostedbrowser.github.io/frostedlinkgen/assets/og-image.png">
 <meta property="og:url" content="https://frostedbrowser.github.io/frostedlinkgen/">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#ff3b3b">
@@ -307,6 +307,7 @@ button:hover {
 
         <div class="buttons">
             <button id="generate-btn">generate</button>
+            <button id="open-all">open all</button>
             <button id="clear">clear</button>
             <button id="themes-btn">themes</button>
         </div>
@@ -374,7 +375,7 @@ button:hover {
         </div>
 
         <div class="results" id="results"></div>
-        <p id="no-results" style="display: none; color: var(--text-dim); text-align: center; margin-top: 20px;">no links generated. maybe try a different option</p>
+        <p id="no-results" style="display: none; color: var(--text-dim); text-align: center; margin-top: 20px;">No links generated based on your selections.</p>
     </div>
 
 </div>
@@ -396,9 +397,8 @@ button:hover {
     <div class="modal-content">
         <div class="title" style="font-size: 1.5rem; margin-bottom: 10px; color: var(--accent);">v.1 release!</div>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 20px;">
-            welcome to frosted link generator v.1.<br><br>
-            <i>statically links take awhile to load</i>
-            <i>made by mrdavidss & crusader372</i>
+            Welcome to the official launch of the link generator.<br><br>
+            <i>P.S. statically.io links load really slow lol</i>
         </p>
         <button id="close-release" style="width: 100%; background: var(--accent); color: black;">let's go</button>
     </div>
@@ -458,7 +458,7 @@ document.getElementById('generate-btn').onclick = async () => {
 
     let count = 0;
 
-    if (selectedCDN === 'all') {
+    if (selectedCDN === 'all' && (selectedUser === 'all' || selectedUser === 'searchfrosted')) {
         addResult("raw.esm.sh (searchfrosted)", "https://raw.esm.sh/searchfrosted/chudding.svg");
         count++;
     }
@@ -484,26 +484,29 @@ document.getElementById('generate-btn').onclick = async () => {
     }
 
     users.forEach(u => {
+        const isPackage = u === 'searchfrosted';
         branches.forEach(b => {
+]            if (isPackage && b !== '1.0.5') return;
+
             cdns.forEach(c => {
                 if (c === 'jsdelivr') {
                     mirrors.forEach(m => {
                         if (m === 'testingcf' && !TESTINGCF_USERS.includes(u)) return;
                         
-                        if (u !== 'searchfrosted') {
+                        if (!isPackage) {
                             const link = `https://${m}.jsdelivr.net/gh/${u}/${repo}@${b}/${file}`.replace('@1.0.5', '');
                             addResult(`jsDelivr (${m}) - ${u} (${b})`, link);
                             count++;
+                        } else {
+                            const npmLink = `https://${m}.jsdelivr.net/npm/${u}@${b}/${file}`;
+                            addResult(`jsDelivr NPM (${m}) - ${u} (${b})`, npmLink);
+                            count++;
                         }
-
-                        const npmLink = `https://${m}.jsdelivr.net/npm/${u}@${b}/${file}`;
-                        addResult(`jsDelivr NPM (${m}) - ${u} (${b})`, npmLink);
-                        count++;
                     });
-                } else if (c === 'statically' && u !== 'searchfrosted') {
+                } else if (c === 'statically' && !isPackage) {
                     addResult(`statically.io - ${u} (${b})`, `https://cdn.statically.io/gh/${u}/${repo}/${b}/${file}`);
                     count++;
-                } else if (c === 'githack' && u !== 'searchfrosted') {
+                } else if (c === 'githack' && !isPackage) {
                     addResult(`githack - ${u} (${b})`, `https://raw.githack.com/${u}/${repo}/${b}/${file}`);
                     count++;
                 }
@@ -668,6 +671,10 @@ function copy(text) {
     navigator.clipboard.writeText(text);
     showToast();
 }
+
+document.getElementById('open-all').onclick = () => {
+    [...document.querySelectorAll('.link')].forEach(e => window.open(e.textContent, '_blank'));
+};
 
 document.getElementById('clear').onclick = () => {
     resultsEl.innerHTML = '';
