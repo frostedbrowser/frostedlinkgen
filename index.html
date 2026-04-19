@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>frosted link generator</title>
-
+<meta property="og:title" content="frosted link generator v.1">
+<meta property="og:description" content="generate frosted links by mrdavidss & crusader372">
+<meta property="og:image" content="https://frostedbrowser.github.io/frostedlinkgen/assets/og-image.png">
+<meta property="og:url" content="https://frostedbrowser.github.io/frostedlinkgen/">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#ff3b3b">
+<icon rel="icon" href="https://frostedbrowser.github.io/frostedlinkgen/assets/icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
@@ -200,6 +206,7 @@ button:hover {
 .toast.show {
     opacity: 1;
 }
+
 @media (max-width: 800px) {
     .app {
         grid-template-columns: 1fr;
@@ -305,7 +312,6 @@ button:hover {
 <div class="toast" id="toast">copied</div>
 
 <script>
-    // chud chud chud sahur
 const ALL_USERS = ['searchfrosted', 'Science-Math-2248', 'applebeescheese16-glitch', 'mrdavidss-vgg', 'archived-sites', 'frostedbrowser', 'mrdavidsz', 'Alsetle', 'mrdavidzs'];
 const ALL_BRANCHES = ['1.0.5', 'main', 'A1', 'A2', 'A3', 'A4', 'A5'];
 const ALL_MIRRORS = ['cdn', 'quantil', 'fastly', 'gcore'];
@@ -334,9 +340,8 @@ document.getElementById('generate-btn').onclick = async () => {
     const cdns = selectedCDN === 'all' ? ALL_CDNS : [selectedCDN];
 
     let count = 0;
-
     if (selectedCDN === 'all') {
-        addResult("raw.esm.sh (searchfrosted)", "https://raw.esm.sh/searchfrosted/chudding.svg");
+        addResult("raw.esm.sh (searchfrosted)", "https://raw.esm.sh/searchfrosted@1.0.5/chudding.svg");
         count++;
     }
 
@@ -360,6 +365,7 @@ document.getElementById('generate-btn').onclick = async () => {
         }
     }
 
+    // Feature: Matrix generation
     users.forEach(u => {
         branches.forEach(b => {
             cdns.forEach(c => {
