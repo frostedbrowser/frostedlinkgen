@@ -307,7 +307,6 @@ button:hover {
 
         <div class="buttons">
             <button id="generate-btn">generate</button>
-            <button id="open-all">open all</button>
             <button id="clear">clear</button>
             <button id="themes-btn">themes</button>
         </div>
@@ -669,10 +668,6 @@ function copy(text) {
     navigator.clipboard.writeText(text);
     showToast();
 }
-
-document.getElementById('open-all').onclick = () => {
-    [...document.querySelectorAll('.link')].forEach(e => window.open(e.textContent, '_blank'));
-};
 
 document.getElementById('clear').onclick = () => {
     resultsEl.innerHTML = '';
