@@ -27,12 +27,11 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    font-style: italic;
+    font-style: bold;
     background: var(--bg);
     color: var(--text);
 }
 
-/* LAYOUT */
 .app {
     display: grid;
     grid-template-columns: 260px 1fr;
@@ -232,7 +231,6 @@ button:hover {
 
         <div class="buttons">
             <button id="generate-btn">generate</button>
-            <button id="copy-all">copy all</button>
             <button id="open-all">open all</button>
             <button id="clear">clear</button>
         </div>
@@ -354,7 +352,6 @@ document.getElementById('generate-btn').onclick = async () => {
                     const data = await res.json();
                     data.forEach(link => {
                         const u = (link.match(/\/gh\/([^\/]+)/) || [])[1] || 'unknown';
-                        // Apply cleanup to external links if they contain the targeted version
                         addResult(`jsDelivr (${source.name}) - ${u}`, link.replace('@1.0.5', ''));
                         count++;
                     });
@@ -363,7 +360,6 @@ document.getElementById('generate-btn').onclick = async () => {
         }
     }
 
-    // Feature: Matrix generation
     users.forEach(u => {
         branches.forEach(b => {
             cdns.forEach(c => {
@@ -410,12 +406,6 @@ function copy(text) {
     showToast();
 }
 
-document.getElementById('copy-all').onclick = () => {
-    const all = [...document.querySelectorAll('.link')]
-        .map(e => e.textContent)
-        .join('\n');
-    copy(all);
-};
 
 document.getElementById('open-all').onclick = () => {
     [...document.querySelectorAll('.link')].forEach(e => window.open(e.textContent, '_blank'));
