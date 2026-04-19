@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>frosted link generator</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg: #0b0b0c;
+    --panel: #141416;
+    --panel-soft: #1b1b1e;
+    --border: #26262b;
+    --text: #f2f2f2;
+    --text-dim: #8a8a92;
+    --accent: #ff3b3b;
+    --accent-soft: #ff3b3b33;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    font-style: italic;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* LAYOUT */
+.app {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* SIDEBAR */
+.sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 0px; /* Optional: hide scrollbar in sidebar for a cleaner look */
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+
+select {
+    background: var(--panel-soft);
+    border: 1px solid var(--border);
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-style: italic;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+button {
+    background: var(--panel-soft);
+    border: 1px solid var(--border);
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+    font-style: italic;
+}
+
+button:hover {
+    border-color: var(--accent);
+}
+
+#generate-btn {
+    background: var(--accent);
+    color: black;
+    font-weight: 600;
+}
+
+/* MAIN */
+.main {
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    color: var(--accent);
+}
+
+.count {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+#loading-indicator {
+    font-size: 0.8rem;
+    color: var(--accent);
+    display: none;
+}
+
+/* RESULTS */
+.results {
+    display: grid;
+    gap: 10px;
+}
+
+.result {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.result:hover {
+    border-color: var(--accent);
+}
+
+.result-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 0.8rem;
+    color: var(--accent);
+}
+
+.link {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #ff9b9b;
+    word-break: break-all;
+}
+
+/* ACTIONS */
+.actions {
+    display: flex;
+    gap: 6px;
+}
+
+.small-btn {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+}
+
+/* TOAST */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: black;
+    padding: 10px 14px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+/* MOBILE */
+@media (max-width: 800px) {
+    .app {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+    }
+
+    .sidebar, .main {
+        overflow-y: visible;
+    }
+
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="sidebar">
+        <div>
+            <div class="title">frosted</div>
+            <div class="subtitle">link generator</div>
+        </div>
+
+        <div class="buttons">
+            <button id="generate-btn">generate</button>
+            <button id="copy-all">copy all</button>
+            <button id="open-all">open all</button>
+            <button id="clear">clear</button>
+        </div>
+
+        <div class="form-group">
+            <label>cdn</label>
+            <select id="cdn">
+                <option value="all">All Links</option>
+                <option value="jsdelivr" selected>jsDelivr</option>
+                <option value="statically">statically.io</option>
+                <option value="githack">githack</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>jsdelivr mirror</label>
+            <select id="mirror">
+                <option value="all" selected>All Mirrors</option>
+                <option value="cdn" selected>cdn.jsdelivr.net</option>
+                <option value="quantil">quantil.jsdelivr.net</option>
+                <option value="fastly">fastly.jsdelivr.net</option>
+                <option value="gcore">gcore.jsdelivr.net</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>user</label>
+            <select id="user">
+                <option value="all" selected>All Users</option>
+                <option value="searchfrosted">searchfrosted</option>
+                <option value="Science-Math-2248">Science-Math-2248</option>
+                <option value="applebeescheese16-glitch">applebeescheese16-glitch</option>
+                <option value="mrdavidss-vgg">mrdavidss-vgg</option>
+                <option value="archived-sites">archived-sites</option>
+                <option value="frostedbrowser">frostedbrowser</option>
+                <option value="mrdavidsz">mrdavidsz</option>
+                <option value="Alsetle">Alsetle</option>
+                <option value="mrdavidzs">mrdavidzs</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>branch</label>
+            <select id="branch">
+                <option value="all" selected>All Branches</option>
+                <option value="1.0.5">1.0.5</option>
+                <option value="main">main</option>
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="A3">A3</option>
+                <option value="A4">A4</option>
+                <option value="A5">A5</option>
+            </select>
+        </div>
+
+        <input type="hidden" id="repo-input" value="svgfrosted">
+        <input type="hidden" id="file-input" value="chudding.svg">
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <h1>generated links</h1>
+            <div class="count" id="count">0 links <span id="loading-indicator">...generating</span></div>
+        </div>
+
+        <div class="results" id="results"></div>
+        <p id="no-results" style="display: none; color: var(--text-dim); text-align: center; margin-top: 20px;">No links generated based on your selections.</p>
+    </div>
+
+</div>
+
+<div class="toast" id="toast">copied</div>
+
+<script>
+const ALL_USERS = ['searchfrosted', 'Science-Math-2248', 'applebeescheese16-glitch', 'mrdavidss-vgg', 'archived-sites', 'frostedbrowser', 'mrdavidsz', 'Alsetle', 'mrdavidzs'];
+const ALL_BRANCHES = ['1.0.5', 'main', 'A1', 'A2', 'A3', 'A4', 'A5'];
+const ALL_MIRRORS = ['cdn', 'quantil', 'fastly', 'gcore'];
+const ALL_CDNS = ['jsdelivr', 'statically', 'githack'];
+
+const resultsEl = document.getElementById('results');
+const countEl = document.getElementById('count');
+const loadingEl = document.getElementById('loading-indicator');
+const noResultsEl = document.getElementById('no-results');
+
+document.getElementById('generate-btn').onclick = async () => {
+    resultsEl.innerHTML = '';
+    loadingEl.style.display = 'inline';
+    noResultsEl.style.display = 'none';
+
+    const selectedCDN = document.getElementById('cdn').value;
+    const selectedMirror = document.getElementById('mirror').value;
+    const selectedUser = document.getElementById('user').value;
+    const selectedBranch = document.getElementById('branch').value;
+    const repo = document.getElementById('repo-input').value;
+    const file = document.getElementById('file-input').value;
+
+    const users = selectedUser === 'all' ? ALL_USERS : [selectedUser];
+    const branches = selectedBranch === 'all' ? ALL_BRANCHES : [selectedBranch];
+    const mirrors = selectedMirror === 'all' ? ALL_MIRRORS : [selectedMirror];
+    const cdns = selectedCDN === 'all' ? ALL_CDNS : [selectedCDN];
+
+    let count = 0;
+
+    // Feature: raw.esm.sh
+    if (selectedCDN === 'all') {
+        // Removing @1.0.5 as it's a GitHub-sourced link
+        addResult("raw.esm.sh (searchfrosted)", "https://raw.esm.sh/searchfrosted/chudding.svg");
+        count++;
+    }
+
+    // Feature: External JSON fetches
+    if (cdns.includes('jsdelivr')) {
+        const mirrorSources = [];
+        if (mirrors.includes('cdn')) mirrorSources.push({ url: 'cdnjsdelivr.json', name: 'cdn' });
+        if (mirrors.includes('quantil')) mirrorSources.push({ url: 'quantiljsdelivr.json', name: 'quantil' });
+
+        for (const source of mirrorSources) {
+            try {
+                const res = await fetch(source.url);
+                if (res.ok) {
+                    const data = await res.json();
+                    data.forEach(link => {
+                        const u = (link.match(/\/gh\/([^\/]+)/) || [])[1] || 'unknown';
+                        // Apply cleanup to external links if they contain the targeted version
+                        addResult(`jsDelivr (${source.name}) - ${u}`, link.replace('@1.0.5', ''));
+                        count++;
+                    });
+                }
+            } catch (e) { console.warn(e); }
+        }
+    }
+
+    // Feature: Matrix generation
+    users.forEach(u => {
+        branches.forEach(b => {
+            cdns.forEach(c => {
+                if (c === 'jsdelivr') {
+                    mirrors.forEach(m => {
+                        const link = `https://${m}.jsdelivr.net/gh/${u}/${repo}@${b}/${file}`.replace('@1.0.5', '');
+                        addResult(`jsDelivr (${m}) - ${u} (${b})`, link);
+                        count++;
+                    });
+                } else if (c === 'statically') {
+                    addResult(`statically.io - ${u} (${b})`, `https://cdn.statically.io/gh/${u}/${repo}/${b}/${file}`);
+                    count++;
+                } else if (c === 'githack') {
+                    addResult(`githack - ${u} (${b})`, `https://raw.githack.com/${u}/${repo}/${b}/${file}`);
+                    count++;
+                }
+            });
+        });
+    });
+
+    countEl.innerHTML = `${count} links <span id="loading-indicator" style="display:none">...generating</span>`;
+    loadingEl.style.display = 'none';
+    if (count === 0) noResultsEl.style.display = 'block';
+};
+
+function addResult(title, link) {
+    const div = document.createElement('div');
+    div.className = 'result';
+    div.innerHTML = `
+        <div class="result-top">
+            <span>${title}</span>
+            <div class="actions">
+                <button class="small-btn" onclick="copy('${link}')">copy</button>
+                <button class="small-btn" onclick="window.open('${link}')">open</button>
+            </div>
+        </div>
+        <div class="link">${link}</div>
+    `;
+    resultsEl.appendChild(div);
+}
+
+function copy(text) {
+    navigator.clipboard.writeText(text);
+    showToast();
+}
+
+document.getElementById('copy-all').onclick = () => {
+    const all = [...document.querySelectorAll('.link')]
+        .map(e => e.textContent)
+        .join('\n');
+    copy(all);
+};
+
+document.getElementById('open-all').onclick = () => {
+    [...document.querySelectorAll('.link')].forEach(e => window.open(e.textContent, '_blank'));
+};
+
+document.getElementById('clear').onclick = () => {
+    resultsEl.innerHTML = '';
+    countEl.innerHTML = `0 links <span id="loading-indicator" style="display:none">...generating</span>`;
+    noResultsEl.style.display = 'none';
+};
+
+function showToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1500);
+}
+</script>
+
+</body>
+</html>
