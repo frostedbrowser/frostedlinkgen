@@ -40,7 +40,6 @@ body {
     overflow: hidden;
 }
 
-/* SIDEBAR */
 .sidebar {
     background: var(--panel);
     border-right: 1px solid var(--border);
@@ -52,7 +51,7 @@ body {
 }
 
 .sidebar::-webkit-scrollbar {
-    width: 0px; /* Optional: hide scrollbar in sidebar for a cleaner look */
+    width: 0px;
 }
 
 .title {
@@ -120,7 +119,6 @@ button:hover {
     font-weight: 600;
 }
 
-/* MAIN */
 .main {
     padding: 30px;
     overflow-y: auto;
@@ -146,7 +144,6 @@ button:hover {
     display: none;
 }
 
-/* RESULTS */
 .results {
     display: grid;
     gap: 10px;
@@ -179,7 +176,6 @@ button:hover {
     word-break: break-all;
 }
 
-/* ACTIONS */
 .actions {
     display: flex;
     gap: 6px;
@@ -190,7 +186,6 @@ button:hover {
     padding: 4px 8px;
 }
 
-/* TOAST */
 .toast {
     position: fixed;
     bottom: 20px;
@@ -206,8 +201,6 @@ button:hover {
 .toast.show {
     opacity: 1;
 }
-
-/* MOBILE */
 @media (max-width: 800px) {
     .app {
         grid-template-columns: 1fr;
@@ -314,6 +307,7 @@ button:hover {
 <div class="toast" id="toast">copied</div>
 
 <script>
+    // chud chud chud sahur
 const ALL_USERS = ['searchfrosted', 'Science-Math-2248', 'applebeescheese16-glitch', 'mrdavidss-vgg', 'archived-sites', 'frostedbrowser', 'mrdavidsz', 'Alsetle', 'mrdavidzs'];
 const ALL_BRANCHES = ['1.0.5', 'main', 'A1', 'A2', 'A3', 'A4', 'A5'];
 const ALL_MIRRORS = ['cdn', 'quantil', 'fastly', 'gcore'];
@@ -343,14 +337,11 @@ document.getElementById('generate-btn').onclick = async () => {
 
     let count = 0;
 
-    // Feature: raw.esm.sh
     if (selectedCDN === 'all') {
-        // Removing @1.0.5 as it's a GitHub-sourced link
         addResult("raw.esm.sh (searchfrosted)", "https://raw.esm.sh/searchfrosted/chudding.svg");
         count++;
     }
 
-    // Feature: External JSON fetches
     if (cdns.includes('jsdelivr')) {
         const mirrorSources = [];
         if (mirrors.includes('cdn')) mirrorSources.push({ url: 'cdnjsdelivr.json', name: 'cdn' });
