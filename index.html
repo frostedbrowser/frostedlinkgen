@@ -1,693 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
+<!---truly gooncoded--->
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>frosted link generator</title>
-<meta property="og:title" content="frosted link generator v.1">
-<meta property="og:description" content="generate frosted links by mrdavidss & crusader372">
-<meta property="og:image" content="https://frostedbrowser.github.io/frostedlinkgen/assets/og-image.png">
-<meta property="og:url" content="https://frostedbrowser.github.io/frostedlinkgen/">
-<meta property="og:type" content="website">
-<meta name="theme-color" content="#ff3b3b">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-<script src="assets/vanta.fog.min.js"></script>
-
-<style>
-:root {
-    --bg: #0b0b0c;
-    --panel: rgba(20, 20, 22, 0.85);
-    --panel-solid: #141416;
-    --panel-soft: rgba(27, 27, 30, 0.9);
-    --border: #26262b;
-    --text: #f2f2f2;
-    --text-dim: #8a8a92;
-    --accent: #f2f2f2;
-    --accent-soft: #f2f2f233;
-    --link-color: #8a8a92;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Montserrat', sans-serif;
-    font-style: bold;
-    background: var(--bg);
-    color: var(--text);
-    text-shadow: 0 0 8px var(--accent-soft);
-}
-
-#vanta-bg {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -2;
-}
-
-#particle-grid {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 1s;
-}
-#particle-grid.visible { opacity: 1; }
-
-.app {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    height: 100vh;
-    overflow: hidden;
-}
-
-.sidebar {
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    overflow-y: auto;
-}
-
-.sidebar::-webkit-scrollbar {
-    width: 0px;
-}
-
-.title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--accent);
-}
-
-.subtitle {
-    font-size: 0.8rem;
-    color: var(--text-dim);
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-label {
-    font-size: 0.7rem;
-    color: var(--text-dim);
-}
-
-select {
-    background: var(--panel-soft);
-    border: 1px solid var(--border);
-    color: white;
-    padding: 10px;
-    border-radius: 6px;
-    font-family: inherit;
-    font-style: bold;
-}
-
-select:focus {
-    outline: none;
-    border-color: var(--accent);
-}
-
-.buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-button {
-    background: var(--panel-soft);
-    border: 1px solid var(--border);
-    color: white;
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.2s;
-    font-family: inherit;
-    font-style: bold;
-}
-
-button:hover {
-    border-color: var(--accent);
-}
-
-#generate-btn {
-    background: var(--accent);
-    color: black;
-    font-weight: 600;
-}
-
-.main {
-    padding: 30px;
-    overflow-y: auto;
-    background: rgba(11, 11, 12, 0.4);
-}
-
-.header {
-    margin-bottom: 20px;
-}
-
-.header h1 {
-    font-size: 1.8rem;
-    color: var(--accent);
-}
-
-.count {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-}
-
-#loading-indicator {
-    font-size: 0.8rem;
-    color: var(--accent);
-    display: none;
-}
-
-.results {
-    display: grid;
-    gap: 10px;
-}
-
-.result {
-    background: var(--panel-solid);
-    border: 1px solid var(--border);
-    padding: 14px;
-    border-radius: 6px;
-    transition: 0.2s;
-    box-shadow: 0 0 10px var(--accent-soft);
-}
-
-.result:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 20px var(--accent-soft);
-}
-
-.result-top {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    font-size: 0.8rem;
-    color: var(--accent);
-}
-
-.link {
-    font-family: monospace;
-    font-size: 0.85rem;
-    color: var(--link-color);
-    word-break: break-all;
-}
-
-.actions {
-    display: flex;
-    gap: 6px;
-}
-
-.small-btn {
-    font-size: 0.7rem;
-    padding: 4px 8px;
-}
-
-.toast {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--accent);
-    color: black;
-    padding: 10px 14px;
-    border-radius: 6px;
-    opacity: 0;
-    transition: 0.3s;
-}
-
-.toast.show {
-    opacity: 1;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(8px);
-    z-index: 2000;
-    justify-content: center;
-    align-items: center;
-}
-.modal.show { display: flex; }
-.modal-content {
-    background: var(--panel-solid);
-    border: 1px solid var(--border);
-    padding: 30px;
-    border-radius: 16px;
-    width: 320px;
-    text-align: center;
-    animation: silkShow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.theme-options {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 25px 0;
-}
-.theme-opt {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 2px solid var(--border);
-}
-.theme-opt:hover { transform: scale(1.25); border-color: white; }
-
-@keyframes silkShow {
-    from { opacity: 0; transform: translateY(30px) scale(0.9); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@media (max-width: 800px) {
-    .app {
-        grid-template-columns: 1fr;
-        height: auto;
-        overflow: visible;
-    }
-
-    .sidebar, .main {
-        overflow-y: visible;
-    }
-
-    .sidebar {
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-    }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>frosted link generator</title>
+    <meta property="og:title" content="frosted link generator v.1">
+    <meta property="og:description" content="generate frosted links by mrdavidss & crusader372">
+    <meta property="og:image" content="https://frostedbrowser.github.io/frostedlinkgen/assets/og-image.png">
+    <meta property="og:url" content="https://frostedbrowser.github.io/frostedlinkgen/">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#ff3b3b">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="assets/vanta.fog.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div id="vanta-bg"></div>
-<canvas id="particle-grid"></canvas>
+    <div id="vanta-bg"></div>
+    <canvas id="particle-grid"></canvas>
 
-<div class="app">
+    <div class="app">
 
-    <div class="sidebar">
-        <div>
-            <div class="title">frosted</div>
-            <div class="subtitle">link generator</div>
-        </div>
-
-        <div class="buttons">
-            <button id="generate-btn">generate</button>
-            <button id="open-all">open all</button>
-            <button id="clear">clear</button>
-            <button id="themes-btn">themes</button>
-        </div>
-
-        <div class="form-group">
-            <label>cdn</label>
-            <select id="cdn">
-                <option value="all">All Links</option>
-                <option value="jsdelivr" selected>jsDelivr</option>
-                <option value="statically">statically.io</option>
-                <option value="githack">githack</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>jsdelivr mirror</label>
-            <select id="mirror">
-                <option value="all" selected>All Mirrors</option>
-                <option value="cdn" selected>cdn.jsdelivr.net</option>
-                <option value="quantil">quantil.jsdelivr.net</option>
-                <option value="fastly">fastly.jsdelivr.net</option>
-                <option value="gcore">gcore.jsdelivr.net</option>
-                <option value="testingcf">testingcf.jsdelivr.net</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>user / package</label>
-            <select id="user">
-                <option value="all" selected>All Users</option>
-                <option value="searchfrosted">searchfrosted</option>
-                <option value="Science-Math-2248">Science-Math-2248</option>
-                <option value="applebeescheese16-glitch">applebeescheese16-glitch</option>
-                <option value="mrdavidss-vgg">mrdavidss-vgg</option>
-                <option value="archived-sites">archived-sites</option>
-                <option value="frostedbrowser">frostedbrowser</option>
-                <option value="mrdavidsz">mrdavidsz</option>
-                <option value="Alsetle">Alsetle</option>
-                <option value="mrdavidzs">mrdavidzs</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>branch</label>
-            <select id="branch">
-                <option value="all" selected>All Branches</option>
-                <option value="1.0.5">1.0.5</option>
-                <option value="main">main</option>
-                <option value="A1">A1</option>
-                <option value="A2">A2</option>
-                <option value="A3">A3</option>
-                <option value="A4">A4</option>
-                <option value="A5">A5</option>
-            </select>
-        </div>
-
-        <input type="hidden" id="repo-input" value="svgfrosted">
-        <input type="hidden" id="file-input" value="chudding.svg">
-    </div>
-
-    <div class="main">
-        <div class="header">
-            <h1>generated links</h1>
-            <div class="count" id="count">0 links <span id="loading-indicator">...generating</span></div>
-        </div>
-
-        <div class="results" id="results"></div>
-        <p id="no-results" style="display: none; color: var(--text-dim); text-align: center; margin-top: 20px;">No links generated based on your selections.</p>
-    </div>
-
-</div>
-
-<div class="modal" id="theme-modal">
-    <div class="modal-content">
-        <div class="title" style="font-size: 1.2rem; margin-bottom: 10px;">select theme</div>
-        <div class="theme-options">
-            <div class="theme-opt" data-theme="red" style="background: #ff3b3b"></div>
-            <div class="theme-opt" data-theme="blue" style="background: #3b5fff"></div>
-            <div class="theme-opt" data-theme="green" style="background: #3bff62"></div>
-            <div class="theme-opt" data-theme="dark" style="background: #f2f2f2"></div>
-        </div>
-        <button id="close-modal" style="width: 100%">close</button>
-    </div>
-</div>
-
-<div class="modal" id="release-modal">
-    <div class="modal-content">
-        <div class="title" style="font-size: 1.5rem; margin-bottom: 10px; color: var(--accent);">v.1 release!</div>
-        <p style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 20px;">
-            Welcome to the official launch of the link generator.<br><br>
-            <i>P.S. statically.io links load really slow lol</i>
-        </p>
-        <button id="close-release" style="width: 100%; background: var(--accent); color: black;">let's go</button>
-    </div>
-</div>
-
-<div class="toast" id="toast">copied</div>
-
-<script>
-const ALL_USERS = ['searchfrosted', 'Science-Math-2248', 'applebeescheese16-glitch', 'mrdavidss-vgg', 'archived-sites', 'frostedbrowser', 'mrdavidsz', 'Alsetle', 'mrdavidzs'];
-const ALL_BRANCHES = ['1.0.5', 'main', 'A1', 'A2', 'A3', 'A4', 'A5'];
-const ALL_MIRRORS = ['cdn', 'quantil', 'fastly', 'gcore', 'testingcf'];
-const ALL_CDNS = ['jsdelivr', 'statically', 'githack'];
-const TESTINGCF_USERS = ['mrdavidss-vgg', 'archived-sites', 'frostedbrowser', 'mrdavidsz', 'Alsetle', 'mrdavidzs'];
-
-const themeConfigs = {
-    red: { accent: '#ff3b3b', soft: '#ff3b3b33', link: '#ff9b9b', fog: { highlight: 0xff3b3b, midtone: 0x220000, lowlight: 0xff0000, base: 0x0b0b0c } },
-    blue: { accent: '#3b5fff', soft: '#4f3bff33', link: '#9badff', fog: { highlight: 0x3b5fff, midtone: 0x000022, lowlight: 0x0000ff, base: 0x0b0b0c } },
-    green: { accent: '#3bff62', soft: '#3bff6233', link: '#9bffad', fog: { highlight: 0x3bff62, midtone: 0x002200, lowlight: 0x00ff00, base: 0x0b0b0c } },
-    dark: { accent: '#f2f2f2', soft: '#f2f2f233', link: '#8a8a92', fog: { highlight: 0x444444, midtone: 0x111111, lowlight: 0x222222, base: 0x0b0b0c } }
-};
-
-function applyTheme(themeId) {
-    const t = themeConfigs[themeId];
-    if (!t) return;
-    const root = document.documentElement;
-    root.style.setProperty('--accent', t.accent);
-    root.style.setProperty('--accent-soft', t.soft);
-    root.style.setProperty('--link-color', t.link);
-}
-
-let currentThemeId = localStorage.getItem('frosted-theme') || 'dark';
-applyTheme(currentThemeId);
-
-const $ = (id) => document.querySelector(id);
-
-const resultsEl = document.getElementById('results');
-const countEl = document.getElementById('count');
-const loadingEl = document.getElementById('loading-indicator');
-const noResultsEl = document.getElementById('no-results');
-
-document.getElementById('generate-btn').onclick = async () => {
-    resultsEl.innerHTML = '';
-    loadingEl.style.display = 'inline';
-    noResultsEl.style.display = 'none';
-
-    const selectedCDN = document.getElementById('cdn').value;
-    const selectedMirror = document.getElementById('mirror').value;
-    const selectedUser = document.getElementById('user').value;
-    const selectedBranch = document.getElementById('branch').value;
-    const repo = document.getElementById('repo-input').value;
-    const file = document.getElementById('file-input').value;
-
-    const users = selectedUser === 'all' ? ALL_USERS : [selectedUser];
-    const branches = selectedBranch === 'all' ? ALL_BRANCHES : [selectedBranch];
-    const mirrors = selectedMirror === 'all' ? ALL_MIRRORS : [selectedMirror];
-    const cdns = selectedCDN === 'all' ? ALL_CDNS : [selectedCDN];
-
-    let count = 0;
-
-    if (selectedCDN === 'all' && (selectedUser === 'all' || selectedUser === 'searchfrosted')) {
-        addResult("raw.esm.sh (searchfrosted)", "https://raw.esm.sh/searchfrosted/chudding.svg");
-        count++;
-    }
-
-    if (cdns.includes('jsdelivr')) {
-        const mirrorSources = [];
-        if (mirrors.includes('cdn')) mirrorSources.push({ url: 'cdnjsdelivr.json', name: 'cdn' });
-        if (mirrors.includes('quantil')) mirrorSources.push({ url: 'quantiljsdelivr.json', name: 'quantil' });
-
-        for (const source of mirrorSources) {
-            try {
-                const res = await fetch(source.url);
-                if (res.ok) {
-                    const data = await res.json();
-                    data.forEach(link => {
-                        const u = (link.match(/\/gh\/([^\/]+)/) || [])[1] || 'unknown';
-                        addResult(`jsDelivr (${source.name}) - ${u}`, link.replace('@1.0.5', ''));
-                        count++;
-                    });
-                }
-            } catch (e) { console.warn(e); }
-        }
-    }
-
-    users.forEach(u => {
-        const isPackage = u === 'searchfrosted';
-        branches.forEach(b => {
-            if (isPackage && b !== '1.0.5') return;
-
-            cdns.forEach(c => {
-                if (c === 'jsdelivr') {
-                    mirrors.forEach(m => {
-                        if (m === 'testingcf' && !TESTINGCF_USERS.includes(u)) return;
-                        
-                        if (!isPackage) {
-                            const link = `https://${m}.jsdelivr.net/gh/${u}/${repo}@${b}/${file}`.replace('@1.0.5', '');
-                            addResult(`jsDelivr (${m}) - ${u} (${b})`, link);
-                            count++;
-                        } else {
-                            const npmLink = `https://${m}.jsdelivr.net/npm/${u}@${b}/${file}`;
-                            addResult(`jsDelivr NPM (${m}) - ${u} (${b})`, npmLink);
-                            count++;
-                        }
-                    });
-                } else if (c === 'statically' && !isPackage) {
-                    addResult(`statically.io - ${u} (${b})`, `https://cdn.statically.io/gh/${u}/${repo}/${b}/${file}`);
-                    count++;
-                } else if (c === 'githack' && !isPackage) {
-                    addResult(`githack - ${u} (${b})`, `https://raw.githack.com/${u}/${repo}/${b}/${file}`);
-                    count++;
-                }
-            });
-        });
-    });
-
-    countEl.innerHTML = `${count} links <span id="loading-indicator" style="display:none">...generating</span>`;
-    loadingEl.style.display = 'none';
-    if (count === 0) noResultsEl.style.display = 'block';
-};
-
-function addResult(title, link) {
-    const div = document.createElement('div');
-    div.className = 'result';
-    div.innerHTML = `
-        <div class="result-top">
-            <span>${title}</span>
-            <div class="actions">
-                <button class="small-btn" onclick="copy('${link}')">copy</button>
-                <button class="small-btn" onclick="window.open('${link}')">open</button>
+        <div class="sidebar">
+            <div>
+                <div class="title">frosted | v.2</div>
+                <div class="subtitle">frosted link generator</div>
             </div>
+
+            <div class="buttons">
+                <button id="generate-btn">generate</button>
+                <button id="clear">clear</button>
+                <button id="settings-btn">settings</button>
+            </div>
+
+            <div class="form-group">
+                <label>filter check</label>
+                <select id="filter-check">
+                    <option value="all" selected>All Filters</option>
+                    <option value="🛡️ FortiGuard">🛡️ FortiGuard</option>
+                    <option value="🚦 Lightspeed">🚦 Lightspeed</option>
+                    <option value="🔥 Palo Alto">🔥 Palo Alto</option>
+                    <option value="🧱 Blocksi Web">🧱 Blocksi Web</option>
+                    <option value="🧱 Blocksi AI">🧱 Blocksi AI</option>
+                    <option value="🌐 Linewize">🌐 Linewize</option>
+                    <option value="☁️ Cisco Umbrella">☁️ Cisco Umbrella</option>
+                    <option value="⚛️ Securly">⚛️ Securly</option>
+                    <option value="🔒 GoGuardian">🔒 GoGuardian</option>
+                    <option value="🏫 LanSchool">🏫 LanSchool</option>
+                    <option value="🧹 ContentKeeper">🧹 ContentKeeper</option>
+                    <option value="🥏 AristotleK12">🥏 AristotleK12</option>
+                    <option value="🌳 Senso Cloud">🌳 Senso Cloud</option>
+                    <option value="😈 Deledao">😈 Deledao</option>
+                    <option value="💼 iBoss">💼 iBoss</option>
+                    <option value="🛏️ Sophos">🛏️ Sophos</option>
+                    <option value="🐍 Barracuda">🐍 Barracuda</option>
+                    <option value="🎙️ Qustodio">🎙️ Qustodio</option>
+                    <option value="🛢️ DNSFilter">🛢️ DNSFilter</option>
+                    <option value="🪼 ZScaler">🪼 ZScaler</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="info-wrapper">
+                    <label>cdn</label>
+                    <div class="info-icon" id="cdn-info-trigger">ⓘ</div>
+                </div>
+                <select id="cdn">
+                    <option value="all">All Links</option>
+                    <option value="jsdelivr" selected>jsDelivr</option>
+                    <option value="statically">statically.io</option>
+                    <option value="githack">githack</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="mirror-container">
+                <div class="info-wrapper">
+                    <label>jsdelivr mirror</label>
+                    <div class="info-icon" id="info-trigger">ⓘ</div>
+                </div>
+                <select id="mirror">
+                    <option value="all" selected>All Mirrors</option>
+                    <option value="cdn">cdn.jsdelivr.net</option>
+                    <option value="quantil">quantil.jsdelivr.net</option>
+                    <option value="fastly">fastly.jsdelivr.net</option>
+                    <option value="gcore">gcore.jsdelivr.net</option>
+                    <option value="testingcf">testingcf.jsdelivr.net</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>user / package</label>
+                <select id="user">
+                    <option value="all" selected>All Users</option>
+                    <option value="searchfrosted">searchfrosted</option>
+                    <option value="mrdavidss-vgg">mrdavidss-vgg</option>
+                    <option value="archived-sites">archived-sites</option>
+                    <option value="mrdavidsz">mrdavidsz</option>
+                    <option value="Alsetle">Alsetle</option>
+                    <option value="mrdavidzs" selected>mrdavidzs</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>branch</label>
+                <select id="branch">
+                    <option value="all" selected>All Branches</option>
+                    <option value="main">main</option>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="A3">A3</option>
+                    <option value="A4">A4</option>
+                    <option value="A5">A5</option>
+                </select>
+            </div>
+
+            <input type="hidden" id="repo-input" value="svgfrosted">
         </div>
-        <div class="link">${link}</div>
-    `;
-    resultsEl.appendChild(div);
-}
 
-const themeModal = document.getElementById('theme-modal');
-document.getElementById('themes-btn').onclick = () => themeModal.classList.add('show');
-document.getElementById('close-modal').onclick = () => themeModal.classList.remove('show');
-window.onclick = (e) => { if (e.target === themeModal) themeModal.classList.remove('show'); };
+        <div class="main">
+            <div class="header">
+                <h1 id="greeting-banner">hello, user!</h1>
+                <div style="font-size: 1rem; color: var(--text-dim); margin-top: 5px;">generated links</div>
+                <div class="count" id="count">0 links <span id="loading-indicator">...generating</span></div>
+            </div>
 
-document.querySelectorAll('.theme-opt').forEach(opt => {
-    opt.onclick = () => {
-        currentThemeId = opt.dataset.theme;
-        localStorage.setItem('frosted-theme', currentThemeId);
-        applyTheme(currentThemeId);
-        themeModal.classList.remove('show');
-        initFog();
-    };
-});
+            <div class="results" id="results"></div>
+            <div id="central-loader"
+                style="display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 40vh; width: 100%;">
+                <h1 style="font-size: 2.5rem; color: var(--accent); text-shadow: 0 0 20px var(--accent-soft);">Loading
+                    Links</h1>
+                <div style="margin-top: 10px; color: var(--text-dim); animation: pulse 1.5s infinite;">please wait while
+                    we fetch the links...</div>
+            </div>
+            <p id="no-results" style="display: none; color: var(--text-dim); text-align: center; margin-top: 20px;">No
+                links generated based on your selections.</p>
+        </div>
 
-function initFog() {
-    if (window._vantaEffect) {
-        if (typeof window._vantaEffect.destroy === 'function') {
-            window._vantaEffect.destroy();
-        }
-        window._vantaEffect = null;
-    }
+    </div>
 
-    const el = $('#vanta-bg');
-    if (!el) return;
+    <div class="tutorial-overlay" id="tutorial-overlay">
+        <div class="spotlight" id="spotlight"></div>
+        <div class="tutorial-card">
+            <div class="title" id="tut-title" style="font-size: 1.1rem; margin-bottom: 10px; color: var(--accent);">
+                welcome!</div>
+            <p id="tut-desc" style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 20px; line-height: 1.5;">
+            </p>
+            <button id="tut-next" style="width: 100%; background: var(--accent); color: black;">next</button>
+        </div>
+    </div>
 
-    if (typeof VANTA === 'undefined' || !VANTA.FOG) {
-        console.warn('Vanta fog not loaded yet');
-        return;
-    }
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="title" style="font-size: 1.2rem; margin-bottom: 10px;">settings</div>
+            <label style="display: block; margin-top: 15px;">theme</label>
+            <div class="theme-options">
+                <div class="theme-opt" data-theme="red" style="background: #ff3b3b"></div>
+                <div class="theme-opt" data-theme="blue" style="background: #3b5fff"></div>
+                <div class="theme-opt" data-theme="green" style="background: #3bff62"></div>
+                <div class="theme-opt" data-theme="dark" style="background: #333333"></div>
+            </div>
+            <div class="form-group" style="text-align: left; margin-bottom: 15px;">
+                <label>username</label>
+                <input type="text" id="username-input"
+                    style="width: 100%; padding: 10px; border-radius: 6px; background: var(--panel-soft); border: 1px solid var(--border); color: white; font-family: inherit; margin-top: 5px; font-weight: 600;"
+                    placeholder="enter name...">
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label>tab cloaker</label>
+                <select id="cloaker-select" style="width: 100%; margin-top: 5px;">
+                    <option value="none">None</option>
+                    <option value="drive">Google Drive</option>
+                    <option value="classroom">Google Classroom</option>
+                    <option value="canvas">Canvas</option>
+                    <option value="gmail">Gmail</option>
+                    <option value="google">Google Search</option>
+                    <option value="zoom">Zoom</option>
+                </select>
+            </div>
+            <button id="close-settings" style="width: 100%; margin-top: 20px;">close</button>
+        </div>
+    </div>
 
-    const t = themeConfigs[currentThemeId];
-    const f = t.fog;
+    <div class="modal" id="info-modal">
+        <div class="modal-content" style="width: 380px; text-align: left;">
+            <div class="title"
+                style="font-size: 1.2rem; margin-bottom: 15px; text-align: center; color: var(--accent);">mirror status
+            </div>
+            <div id="info-text"
+                style="font-size: 0.75rem; color: var(--text-dim); line-height: 1.8; max-height: 60vh; overflow-y: auto; padding-right: 10px; white-space: pre-line; font-style: normal;">
+            </div>
+            <button id="close-info" style="width: 100%; margin-top: 20px;">close</button>
+        </div>
+    </div>
 
-    try {
-        window._vantaEffect = VANTA.FOG({
-            el: el,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            highlightColor: f.highlight,
-            midtoneColor: f.midtone,
-            lowlightColor: f.lowlight,
-            baseColor: f.base,
-            blurFactor: 0.6,
-            speed: 2.0,
-            zoom: 1.2
-        });
-    } catch (e) {
-        console.warn('Vanta fog init failed', e);
-    }
-}
+    <div class="modal" id="release-modal">
+        <div class="modal-content">
+            <div class="title" style="font-size: 1.5rem; margin-bottom: 10px; color: var(--accent);">v.2 update!</div>
+            <p style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 20px;">
+                welcome to v.2 of frosted link gen<br><br>
+                <i>features added</i>
+                <br><br>
+                <i>--------------</i>
+                <br><br>
+                <i>- tons more links (6.5k+)</i>
+                <br><br>
+                <i>- filter check</i>
+                <br><br>
+                <i>- welcoming notification.</i>
+            </p>
+            <button id="close-release" style="width: 100%; background: var(--accent); color: black;">let's go</button>
+        </div>
+    </div>
 
-let gridAnimId;
-function initParticleGrid() {
-    cancelAnimationFrame(gridAnimId);
-    const c = $('#particle-grid');
-    const ctx = c.getContext('2d');
-    c.width = window.innerWidth;
-    c.height = window.innerHeight;
-
-    c.classList.add('visible');
-
-    const scale = Math.min(c.width, c.height) / 900;
-    const spacing = Math.round(28 * Math.max(scale, 0.6));
-    const radius = 1.2 * Math.max(scale, 0.5);
-    const influenceRadius = 200 * Math.max(scale, 0.6);
-    const maxDisplace = 45 * Math.max(scale, 0.6);
-    const cols = Math.ceil(c.width / spacing) + 1;
-    const rows = Math.ceil(c.height / spacing) + 1;
-    let time = 0;
-
-    const dots = [];
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            dots.push({ homeX: col * spacing, homeY: row * spacing, x: col * spacing, y: row * spacing, col, row, scale: 1 });
-        }
-    }
-
-    const mouse = { x: -9999, y: -9999 };
-    window.onmousemove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
-
-    function draw() {
-        ctx.clearRect(0, 0, c.width, c.height);
-        time += 0.02;
-        for (let i = 0; i < dots.length; i++) {
-            const d = dots[i];
-            const waveX = Math.sin(time + d.col * 0.3 + d.row * 0.15) * 4;
-            const waveY = Math.cos(time * 0.8 + d.row * 0.25 + d.col * 0.1) * 5 + Math.sin(time * 0.5 + d.col * 0.15) * 3;
-            const targetX = d.homeX + waveX;
-            const targetY = d.homeY + waveY;
-            const dx = mouse.x - d.homeX;
-            const dy = mouse.y - d.homeY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < influenceRadius) {
-                const force = (1 - dist / influenceRadius);
-                const angle = Math.atan2(dy, dx);
-                const push = force * force * maxDisplace;
-                d.x += (targetX - Math.cos(angle) * push - d.x) * 0.3;
-                d.y += (targetY - Math.sin(angle) * push - d.y) * 0.3;
-                d.scale += (1 + force * 1.2 - d.scale) * 0.3;
-            } else {
-                d.x += (targetX - d.x) * 0.12; d.y += (targetY - d.y) * 0.12; d.scale += (1 - d.scale) * 0.12;
-            }
-            ctx.beginPath();
-            ctx.arc(d.x, d.y, radius * d.scale, 0, 6.283);
-            ctx.fillStyle = `rgba(255,255,255,${d.scale > 1.05 ? 0.4 + (d.scale - 1) * 0.5 : 0.15})`;
-            ctx.fill();
-        }
-        gridAnimId = requestAnimationFrame(draw);
-    }
-    draw();
-}
-
-window.addEventListener('resize', () => { initParticleGrid(); });
-window.onload = () => { 
-    initFog(); 
-    initParticleGrid(); 
-    
-    if (!localStorage.getItem('frosted-v1-seen')) {
-        document.getElementById('release-modal').classList.add('show');
-    }
-};
-
-document.getElementById('close-release').onclick = () => {
-    document.getElementById('release-modal').classList.remove('show');
-    localStorage.setItem('frosted-v1-seen', 'true');
-};
-
-function copy(text) {
-    navigator.clipboard.writeText(text);
-    showToast();
-}
-
-document.getElementById('open-all').onclick = () => {
-    [...document.querySelectorAll('.link')].forEach(e => window.open(e.textContent, '_blank'));
-};
-
-document.getElementById('clear').onclick = () => {
-    resultsEl.innerHTML = '';
-    countEl.innerHTML = `0 links <span id="loading-indicator" style="display:none">...generating</span>`;
-    noResultsEl.style.display = 'none';
-};
-
-function showToast() {
-    const t = document.getElementById('toast');
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 1500);
-}
-</script>
-
+    <div class="toast" id="toast">copied</div>
+    <script src="index.js"></script>
 </body>
+
 </html>
